@@ -12,7 +12,9 @@ import {
     Cpu,
     CheckCircle,
     HelpCircle,
-    RefreshCw
+    RefreshCw,
+    Mail,
+    Send
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { toast } from "sonner";
@@ -34,6 +36,8 @@ export default function SettingsPage() {
         syncMode: true
     });
     const [isSyncing, setIsSyncing] = useState(false);
+    const [testEmail, setTestEmail] = useState("info@thehideaway.ae");
+    const [isSendingTest, setIsSendingTest] = useState(false);
 
     // Load initial config from localStorage
     useEffect(() => {
@@ -63,6 +67,33 @@ export default function SettingsPage() {
             setIsSyncing(false);
             toast.success("Antigravity OAuth connection verified & synchronized successfully!");
         }, 1500);
+    };
+
+    const handleSendTestEmail = async () => {
+        if (!testEmail || !testEmail.includes("@")) {
+            toast.error("Please enter a valid recipient email address.");
+            return;
+        }
+        setIsSendingTest(true);
+        try {
+            const response = await fetch('/api/email/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: testEmail }),
+            });
+            if (response.ok) {
+                toast.success(`Luxury test email successfully dispatched to ${testEmail}!`);
+            } else {
+                const errData = await response.json();
+                toast.error(errData.error || "Failed to send test email.");
+            }
+        } catch (e) {
+            toast.error("Connection failed. Please check backend dev server.");
+        } finally {
+            setIsSendingTest(false);
+        }
     };
 
     return (
@@ -249,6 +280,42 @@ export default function SettingsPage() {
                                             >
                                                 <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
                                                 Verify & Sync Connection
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* Resend Verification Panel */}
+                                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6 space-y-6">
+                                        <div>
+                                            <h3 className="font-bold text-white mb-1">Resend.com Transactional Mail Gate</h3>
+                                            <p className="text-xs text-white/40">Send an instant luxury HTML welcome letter to verify real-time email delivery with the newly configured API keys.</p>
+                                        </div>
+
+                                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                                            <div className="space-y-2 flex-1">
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/60">Verification Recipient Email</label>
+                                                <input
+                                                    type="email"
+                                                    value={testEmail}
+                                                    onChange={(e) => setTestEmail(e.target.value)}
+                                                    placeholder="Enter recipient email address"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-gold transition-colors"
+                                                />
+                                            </div>
+                                            <Button
+                                                variant="primary"
+                                                onClick={handleSendTestEmail}
+                                                disabled={isSendingTest}
+                                                className="h-[48px] px-6 flex items-center justify-center gap-2 whitespace-nowrap"
+                                            >
+                                                {isSendingTest ? (
+                                                    <div className="w-5 h-5 border-2 border-primary-charcoal border-t-transparent rounded-full animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <Send className="w-4 h-4" />
+                                                        Send Luxury Test Mail
+                                                    </>
+                                                )}
                                             </Button>
                                         </div>
                                     </div>
