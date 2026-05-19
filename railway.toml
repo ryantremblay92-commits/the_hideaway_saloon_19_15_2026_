@@ -1,0 +1,32 @@
+[build]
+builder = "dockerfile"
+buildCommand = "npm run build"
+
+[deploy]
+numReplicas = 1
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[env]
+PORT = "3000"
+NEXT_PUBLIC_SUPABASE_URL = "https://roftnowcdanmfdmpkyxs.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_M9AQyYmLqbqV5JanKQRsVg_8hNLmD10"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "dhgtqfv0a"
+NEXT_PUBLIC_SITE_URL = "https://thehideaway.ae"
+NEXT_PUBLIC_SALON_NAME = "The Hideaway Hair & Beauty Salon"
+NEXT_PUBLIC_SALON_PHONE = "+971 56 134 8671"
+NEXT_PUBLIC_SALON_EMAIL = "hello@thehideaway.ae"
+NEXT_PUBLIC_SALON_ADDRESS = "Dubai, UAE"
+NEXT_PUBLIC_SALON_HOURS = "Mon–Sat 9am–9pm, Sun 10am–8pm"
+NEXT_PUBLIC_WHATSAPP_NUMBER = "971561348671"
+NEXT_PUBLIC_WHATSAPP_MSG = "Hi! I'd like to book an appointment at The Hideaway Hair & Beauty Salon Dubai."
+NEXT_PUBLIC_INSTAGRAM_URL = "https://www.instagram.com/thehideawaydubai"
+NEXT_PUBLIC_FACEBOOK_URL = "https://www.facebook.com/p/thehideawaydubai"
+NEXT_PUBLIC_GOOGLE_REVIEW_URL = "https://www.google.com/maps/place/The+Hideaway+Hair+%26+Beauty+Salon/@25.2048,55.2708,17z"
+
+SUPABASE_SERVICE_ROLE_KEY = "placeholder_service_role_key"
+RESEND_API_KEY = "placeholder_resend_key"
+CLOUDINARY_API_KEY = "placeholder_cloudinary_key"
+CLOUDINARY_API_SECRET = "placeholder_cloudinary_secret"
+FACEBOOK_APP_ID = "placeholder_fb_app_id"
+FACEBOOK_APP_SECRET = "placeholder_fb_app_secret"

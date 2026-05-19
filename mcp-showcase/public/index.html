@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock AI Chat Client</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: #f3f4f6; }
+        .chat-container { width: 100%; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; background: white; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+        .header { padding: 20px; border-bottom: 1px solid #e5e7eb; background: #ffffff; }
+        .header h1 { margin: 0; font-size: 1.25rem; }
+        .suggestions { display: flex; gap: 10px; margin-top: 10px; }
+        .suggestion { padding: 6px 12px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 999px; font-size: 0.8rem; cursor: pointer; color: #334155; transition: background 0.2s; font-weight: 500; }
+        .suggestion:hover { background: #e2e8f0; }
+        .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .message { padding: 15px; border-radius: 8px; max-width: 85%; }
+        .message.user { background: #3b82f6; color: white; align-self: flex-end; }
+        .message.ai { background: #f8fafc; color: #111827; align-self: flex-start; width: 100%; border: 1px solid #e2e8f0; }
+        .input-area { padding: 20px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; background: #ffffff; }
+        input { flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; outline: none; }
+        input:focus { border-color: #3b82f6; }
+        button { padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background: #2563eb; }
+        iframe.mcp-ui { width: 100%; height: 400px; border: none; border-radius: 8px; background: transparent; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>Mock AI Client (Dynamic MCP UIs)</h1>
+            <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 0.875rem;">This client sends your entire prompt to the server to simulate an intelligent LLM response mapping.</p>
+            <div class="suggestions">
+                <div class="suggestion" onclick="sendCustom('show me the mindmap topology')">Topology Mindmap</div>
+                <div class="suggestion" onclick="sendCustom('open live dashboard metrics')">Live Dashboard</div>
+                <div class="suggestion" onclick="sendCustom('start custom domain setup')">Setup Workflow</div>
+            </div>
+        </div>
+        <div class="messages" id="messages">
+            <div class="message ai">Hello! I am a smart mock AI client. I can render entirely different UIs based on your prompt. Try clicking one of the suggestions above!</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="input" placeholder="Ask for a mindmap, dashboard, or setup..." onkeypress="if(event.key === 'Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const inputEl = document.getElementById('input');
+
+        function sendCustom(text) {
+            inputEl.value = text;
+            sendMessage();
+        }
+
+        function appendMessage(text, role, htmlBundle = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            msgDiv.innerHTML = text;
+
+            if (htmlBundle) {
+                const iframe = document.createElement('iframe');
+                iframe.className = 'mcp-ui';
+                iframe.sandbox = "allow-scripts"; 
+                iframe.srcdoc = htmlBundle;
+                msgDiv.appendChild(iframe);
+            }
+
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = inputEl.value.trim();
+            if (!text) return;
+            
+            appendMessage(text, 'user');
+            inputEl.value = '';
+
+            appendMessage('Processing request...', 'ai');
+            const placeholderMsg = messagesDiv.lastChild;
+            
+            try {
+                const res = await fetch('/api/mcp/tool', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: text })
+                });
+                const data = await res.json();
+                
+                setTimeout(() => {
+                    placeholderMsg.innerHTML = `<strong>AI:</strong> ${data.textSummary}`;
+                    if(data.uiBundle) {
+                        const iframe = document.createElement('iframe');
+                        iframe.className = 'mcp-ui';
+                        iframe.sandbox = "allow-scripts"; 
+                        iframe.srcdoc = data.uiBundle;
+                        placeholderMsg.appendChild(iframe);
+                        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    }
+                }, 400);
+            } catch (err) {
+                placeholderMsg.innerHTML = `<strong>Error connecting to MCP backend.</strong>`;
+            }
+        }
+    </script>
+</body>
+</html>

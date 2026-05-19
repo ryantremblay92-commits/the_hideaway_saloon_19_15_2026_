@@ -1,0 +1,122 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "The Hideaway Logo Hideaway" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "The Hideaway Logo" [ref=e6]
+        - generic [ref=e7]: Hideaway
+      - button [ref=e8] [cursor=pointer]:
+        - img [ref=e9]
+  - main [ref=e10]:
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - link "The Hideaway Logo The Hideaway" [ref=e16] [cursor=pointer]:
+          - /url: /
+          - img "The Hideaway Logo" [ref=e18]
+          - generic [ref=e19]: The Hideaway
+        - heading "Welcome Back" [level=2] [ref=e20]
+        - paragraph [ref=e21]: Enter your details to access your rituals.
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: Email Address
+            - generic [ref=e26]:
+              - img [ref=e27]
+              - textbox "your@email.com" [ref=e30]
+          - generic [ref=e31]:
+            - generic [ref=e32]:
+              - generic [ref=e33]: Password
+              - link "Forgot?" [ref=e34] [cursor=pointer]:
+                - /url: "#"
+            - generic [ref=e35]:
+              - img [ref=e36]
+              - textbox "••••••••" [ref=e39]
+              - button [ref=e40] [cursor=pointer]:
+                - img [ref=e41]
+          - button "Sign In" [ref=e44] [cursor=pointer]:
+            - generic [ref=e45]:
+              - text: Sign In
+              - img [ref=e46]
+        - paragraph [ref=e49]:
+          - text: Don't have an account?
+          - link "Create Account" [ref=e50] [cursor=pointer]:
+            - /url: /auth/register
+      - generic [ref=e51]:
+        - paragraph [ref=e52]: OR CONTINUE WITH
+        - generic [ref=e53]:
+          - button "Google" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - text: Google
+          - button "Facebook" [ref=e57] [cursor=pointer]:
+            - img [ref=e58]
+            - text: Facebook
+  - contentinfo [ref=e60]:
+    - generic [ref=e62]:
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - link "The Hideaway Logo The Hideaway" [ref=e65] [cursor=pointer]:
+            - /url: /
+            - img "The Hideaway Logo" [ref=e67]
+            - generic [ref=e68]: The Hideaway
+          - paragraph [ref=e69]:
+            - text: "\"A natural vibe with a touch of modern luxe.\""
+            - text: Dubai's premier hair spa sanctuary specializing in future-proof hair health.
+          - generic [ref=e70]:
+            - link "Instagram" [ref=e71] [cursor=pointer]:
+              - /url: https://www.instagram.com/thehideawaydubai/
+              - img [ref=e72]
+            - link "Facebook" [ref=e75] [cursor=pointer]:
+              - /url: https://www.facebook.com/p/thehideawaydubai
+              - img [ref=e76]
+            - link "Google Reviews" [ref=e78] [cursor=pointer]:
+              - /url: https://www.fresha.com/a/the-hideaway-dubai-403-jumeirah-beach-rd-la-plage-n7u5p6h4
+              - img [ref=e79]
+        - generic [ref=e82]:
+          - heading "The Rituals" [level=4] [ref=e83]
+          - list [ref=e84]:
+            - listitem [ref=e85]:
+              - link "Hair Mastery" [ref=e86] [cursor=pointer]:
+                - /url: /services/haircuts-styling
+            - listitem [ref=e87]:
+              - link "Bridal Couture" [ref=e88] [cursor=pointer]:
+                - /url: /services/bridal-styling
+            - listitem [ref=e89]:
+              - link "Skin Alchemy" [ref=e90] [cursor=pointer]:
+                - /url: /services/skin-care
+            - listitem [ref=e91]:
+              - link "Reserve Session" [ref=e92] [cursor=pointer]:
+                - /url: /book
+                - text: Reserve Session
+        - generic [ref=e94]:
+          - heading "The Atelier" [level=4] [ref=e95]
+          - list [ref=e96]:
+            - listitem [ref=e97]:
+              - img [ref=e98]
+              - generic [ref=e101]:
+                - text: La Plage, 403 Jumeirah Beach Road,
+                - text: Al Athar Street, Jumeirah 2,
+                - text: Dubai, UAE
+            - listitem [ref=e102]:
+              - img [ref=e103]
+              - generic [ref=e105]: 056 134 8671 / 04 591 8879
+            - listitem [ref=e106]:
+              - img [ref=e107]
+              - generic [ref=e110]: info@thehideaway.ae
+        - generic [ref=e111]:
+          - heading "Bespoke Updates" [level=4] [ref=e112]
+          - paragraph [ref=e113]: Join our inner circle for seasonal style reports and VIP early access.
+          - generic [ref=e114]:
+            - textbox "Email" [ref=e115]
+            - button [ref=e116] [cursor=pointer]:
+              - img [ref=e117]
+      - generic [ref=e120]:
+        - paragraph [ref=e121]: © 2026 The Hideaway – Hair & Beauty Salon
+        - generic [ref=e122]:
+          - link "Privacy" [ref=e123] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms" [ref=e124] [cursor=pointer]:
+            - /url: /terms
+  - button [ref=e126] [cursor=pointer]:
+    - img [ref=e127]
+  - region "Notifications alt+T"
+  - alert [ref=e129]
