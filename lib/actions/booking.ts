@@ -1,7 +1,12 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { sendBookingConfirmation } from './email';
+import { 
+    sendBookingConfirmation, 
+    sendBookingCancelled, 
+    sendReviewInvitation, 
+    sendBookingRescheduled 
+} from './email';
 import { notifyAdmins } from './engagement';
 
 export async function createBooking(formData: {
@@ -89,6 +94,13 @@ export async function createBooking(formData: {
 export async function updateBookingStatus(bookingId: string, status: string) {
     const supabase = await createClient();
 
+    // Fetch the booking first to get customer details before update
+    const { data: currentBooking } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single();
+
     // Update booking status
     const { data: booking, error } = await supabase
         .from('bookings')
@@ -112,7 +124,41 @@ export async function updateBookingStatus(bookingId: string, status: string) {
         }]);
     }
 
-    // 2. Loyalty Automation: Award points on completion
+    // 2. Dispatch Live Transactional Emails
+    if (booking.customer_email) {
+        try {
+            if (status === 'cancelled') {
+                console.log(`[Email Dispatch] Sending cancellation email to: ${booking.customer_email}`);
+                await sendBookingCancelled(booking.customer_email, {
+                    name: booking.customer_name,
+                    serviceName: booking.service_name,
+                    date: booking.date
+                });
+            } else if (status === 'completed') {
+                console.log(`[Email Dispatch] Sending review invitation email to: ${booking.customer_email}`);
+                // Try to resolve stylist name
+                let stylistName = 'The Hideaway Artisan Team';
+                if (booking.stylist_id) {
+                    const { data: stylist } = await supabase
+                        .from('stylists')
+                        .select('name')
+                        .eq('id', booking.stylist_id)
+                        .single();
+                    if (stylist?.name) {
+                        stylistName = stylist.name;
+                    }
+                }
+                await sendReviewInvitation(booking.customer_email, {
+                    name: booking.customer_name,
+                    stylistName
+                });
+            }
+        } catch (mailErr) {
+            console.error('Failed to dispatch transactional mail in updateBookingStatus:', mailErr);
+        }
+    }
+
+    // 3. Loyalty Automation: Award points on completion
     if (status === 'completed' && booking.user_id && booking.total_price) {
         // Calculate points (e.g. 1 point per $10 spent)
         const pointsEarned = Math.floor(booking.total_price / 10);
@@ -160,3 +206,77 @@ export async function updateBookingStatus(bookingId: string, status: string) {
 
     return { success: true, booking };
 }
+
+/**
+ * 7. Reschedule Server Action (triggers Rescheduled Email automatically)
+ */
+export async function rescheduleBooking(bookingId: string, newDate: string, newTime: string) {
+    const supabase = await createClient();
+
+    // 1. Get the current booking details
+    const { data: currentBooking, error: fetchError } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single();
+
+    if (fetchError || !currentBooking) {
+        console.error('Failed to find booking for rescheduling:', fetchError);
+        return { success: false, error: 'Booking not found' };
+    }
+
+    const oldDate = `${currentBooking.date} at ${currentBooking.time}`;
+
+    // 2. Perform the update
+    const { data: updatedBooking, error: updateError } = await supabase
+        .from('bookings')
+        .update({
+            date: newDate,
+            time: newTime
+        })
+        .eq('id', bookingId)
+        .select()
+        .single();
+
+    if (updateError || !updatedBooking) {
+        console.error('Failed to reschedule booking in Supabase:', updateError);
+        return { success: false, error: updateError?.message || 'Update failed' };
+    }
+
+    // 3. Add customer push notification if user account exists
+    if (updatedBooking.user_id) {
+        await supabase.from('notifications').insert([{
+            user_id: updatedBooking.user_id,
+            title: 'Ritual Rescheduled',
+            message: `Your booking has been moved to ${newDate} at ${newTime}.`,
+            type: 'info'
+        }]);
+    }
+
+    // 4. Dispatch the rescheduled email to the customer
+    if (updatedBooking.customer_email) {
+        try {
+            console.log(`[Email Dispatch] Sending reschedule email to: ${updatedBooking.customer_email}`);
+            await sendBookingRescheduled(updatedBooking.customer_email, {
+                name: updatedBooking.customer_name,
+                serviceName: updatedBooking.service_name,
+                oldDate,
+                newDate,
+                newTime
+            });
+        } catch (mailErr) {
+            console.error('Failed to dispatch rescheduled email:', mailErr);
+        }
+    }
+
+    // 5. Notify Admins
+    await notifyAdmins(
+        'Ritual Rescheduled',
+        `${updatedBooking.customer_name}'s reservation has been moved from ${oldDate} to ${newDate} at ${newTime}.`,
+        'booking_new',
+        { booking_id: updatedBooking.id }
+    );
+
+    return { success: true, booking: updatedBooking };
+}
+
