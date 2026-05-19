@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import { TeamMember } from "@/lib/data/team";
+import { TeamMember, team as fallbackTeam } from "@/lib/data/team";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { 
@@ -62,8 +62,18 @@ export default function StaffPortal() {
             setAudio(new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"));
         }
         const fetchTeam = async () => {
-            const { data } = await supabase.from('salon_team').select('*').order('id', { ascending: true });
-            if (data) setTeam(data);
+            try {
+                const { data, error } = await supabase.from('salon_team').select('*').order('id', { ascending: true });
+                if (data && data.length > 0) {
+                    setTeam(data);
+                } else {
+                    console.log("Empty or missing salon_team, using static fallbackTeam.");
+                    setTeam(fallbackTeam);
+                }
+            } catch (err) {
+                console.error("Supabase fetch failed, using fallbackTeam:", err);
+                setTeam(fallbackTeam);
+            }
         };
         fetchTeam();
     }, []);

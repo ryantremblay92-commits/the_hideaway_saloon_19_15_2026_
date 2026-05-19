@@ -143,40 +143,69 @@ export default function AdminConsultationChatPage() {
         setIsUpdatingStatus(false);
     };
 
-    // MCP-Powered AI Generation (now with visual feedback simulating supaui `create-image` tool)
+    // Real DALL-E-3 AI Generation via our Next.js API Route Handler
     const handleGenerateAIVariation = async (type: AIActionType) => {
         setActiveAIAction(type);
         setIsAIGenerating(true);
-
-        // Simulate MCP tool call delay (would be actual MCP call to supaui `create-image`)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        const imageUrl =
-            type === 'hairstyle' ? '/mockups/hairstyle_analysis_mockup.png' :
-                type === 'makeup' ? '/mockups/makeup_analysis_mockup.png' :
-                    '/mockups/color_analysis_mockup.png';
 
         const title =
             type === 'hairstyle' ? 'Hairstyle Analysis' :
                 type === 'makeup' ? 'Makeup Analysis' :
                     'Personal Color Analysis';
 
-        const description =
-            type === 'hairstyle'
-                ? "Here are some hairstyle variations I've generated based on your face shape and current hair condition. Let me know which one you prefer!"
-                : type === 'makeup'
-                    ? "I've analyzed your skin undertone and generated these makeup look variations that would complement your requested hair color perfectly."
-                    : "I've performed a digital color draping analysis to find your seasonal palette. These colors will highlight your features best!";
+        try {
+            // Load stored AI engine config from Settings
+            let aiConfig = null;
+            try {
+                const stored = localStorage.getItem("hideaway_ai_config");
+                if (stored) {
+                    aiConfig = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error("Error reading localStorage AI config:", e);
+            }
 
-        const result = await sendMessage(consultationId, description, imageUrl);
+            const response = await fetch('/api/ai/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    consultationId,
+                    type,
+                    config: aiConfig,
+                }),
+            });
 
-        if (result.success) {
-            toast.success(`${title} generated and sent to customer.`);
-        } else {
-            toast.error(result.error);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate image');
+            }
+
+            const data = await response.json();
+            const imageUrl = data.imageUrl;
+
+            const description =
+                type === 'hairstyle'
+                    ? "Here are some hairstyle variations I've generated based on your face shape and current hair condition. Let me know which one you prefer!"
+                    : type === 'makeup'
+                        ? "I've analyzed your skin undertone and generated these makeup look variations that would complement your requested hair color perfectly."
+                        : "I've performed a digital color draping analysis to find your seasonal palette. These colors will highlight your features best!";
+
+            const result = await sendMessage(consultationId, description, imageUrl);
+
+            if (result.success) {
+                toast.success(`${title} generated and sent to customer.`);
+            } else {
+                toast.error(result.error);
+            }
+        } catch (error: any) {
+            console.error('Error generating AI variation:', error);
+            toast.error(error.message || `Failed to generate ${title}.`);
+        } finally {
+            setIsAIGenerating(false);
+            setActiveAIAction(null);
         }
-        setIsAIGenerating(false);
-        setActiveAIAction(null);
     };
 
     const getTimeAgo = (dateStr: string) => {
