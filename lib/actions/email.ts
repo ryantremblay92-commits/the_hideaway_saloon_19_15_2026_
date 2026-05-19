@@ -368,3 +368,271 @@ export async function sendMarketingPromotionEmail(email: string, details: {
     return { success: false, error };
   }
 }
+
+/**
+ * 5. Booking Rescheduled Notification
+ */
+export async function sendBookingRescheduled(email: string, details: {
+  name: string;
+  serviceName: string;
+  oldDate: string;
+  newDate: string;
+  newTime: string;
+}) {
+  try {
+    const from = getFromAddress();
+    await resend.emails.send({
+      from,
+      to: email,
+      subject: 'Ritual Time Updated – The Hideaway Saloon',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Reservation Updated</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #0A0A0B; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #FFFFFF;">
+          <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #0F0F10; border: 1px solid rgba(201, 169, 98, 0.15); margin: 40px auto; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <!-- Header Banner -->
+            <tr>
+              <td align="center" style="background: linear-gradient(135deg, #161617 0%, #0A0A0B 100%); padding: 40px 20px; border-bottom: 1px solid rgba(201, 169, 98, 0.1);">
+                <div style="font-size: 24px; font-weight: 300; letter-spacing: 0.15em; color: #C9A962; text-transform: uppercase;">
+                  THE HIDEAWAY
+                </div>
+                <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 5px;">
+                  HAIR & BEAUTY SANCTUARY
+                </div>
+              </td>
+            </tr>
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 40px 30px 40px;">
+                <h1 style="font-family: Georgia, serif; font-size: 26px; font-weight: normal; line-height: 36px; color: #FFFFFF; margin: 0 0 20px 0; text-align: center;">
+                  Your Ritual Time Has Changed
+                </h1>
+                <p style="font-size: 15px; line-height: 24px; color: rgba(255, 255, 255, 0.6); margin: 0 0 30px 0; text-align: center;">
+                  Dear ${details.name}, your upcoming reservation for **${details.serviceName}** has been updated to a new customized slot.
+                </p>
+                <!-- Details Card -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; margin-bottom: 30px;">
+                  <tr>
+                    <td style="padding-bottom: 12px;">
+                      <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.4);">Previous Time</span>
+                      <div style="font-size: 14px; color: rgba(255, 255, 255, 0.5); text-decoration: line-through; margin-top: 4px;">${details.oldDate}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                      <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; color: #C9A962;">New Scheduled Date</span>
+                      <div style="font-size: 16px; font-weight: bold; color: #FFFFFF; margin-top: 4px;">${details.newDate}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                      <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; color: #C9A962;">New Scheduled Time</span>
+                      <div style="font-size: 16px; font-weight: bold; color: #FFFFFF; margin-top: 4px;">${details.newTime}</div>
+                    </td>
+                  </tr>
+                </table>
+                <!-- CTA Button -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="background-color: #C9A962; border-radius: 12px;">
+                      <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3002'}/dashboard" target="_blank" style="display: inline-block; font-size: 14px; font-weight: bold; color: #0A0A0B; text-decoration: none; padding: 16px 32px; letter-spacing: 0.1em; text-transform: uppercase;">
+                        Confirm Reservation Changes
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="background-color: #0A0A0B; padding: 30px; text-align: center; border-top: 1px solid rgba(201, 169, 98, 0.1);">
+                <p style="font-size: 12px; color: rgba(255,255,255,0.3); margin: 0 0 10px 0;">
+                  La Plage, 403 Jumeirah Beach Road, Dubai, UAE
+                </p>
+                <p style="font-size: 11px; color: rgba(201, 169, 98, 0.4); margin: 0;">
+                  © ${new Date().getFullYear()} The Hideaway Saloon. All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Reschedule Email error:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * 6. Booking Cancelled Notification
+ */
+export async function sendBookingCancelled(email: string, details: {
+  name: string;
+  serviceName: string;
+  date: string;
+}) {
+  try {
+    const from = getFromAddress();
+    await resend.emails.send({
+      from,
+      to: email,
+      subject: 'Ritual Cancelled – The Hideaway Saloon',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Reservation Cancelled</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #0A0A0B; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #FFFFFF;">
+          <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #0F0F10; border: 1px solid rgba(201, 169, 98, 0.15); margin: 40px auto; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <!-- Header Banner -->
+            <tr>
+              <td align="center" style="background: linear-gradient(135deg, #161617 0%, #0A0A0B 100%); padding: 40px 20px; border-bottom: 1px solid rgba(201, 169, 98, 0.1);">
+                <div style="font-size: 24px; font-weight: 300; letter-spacing: 0.15em; color: #C9A962; text-transform: uppercase;">
+                  THE HIDEAWAY
+                </div>
+                <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 5px;">
+                  HAIR & BEAUTY SANCTUARY
+                </div>
+              </td>
+            </tr>
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 40px 30px 40px;">
+                <h1 style="font-family: Georgia, serif; font-size: 26px; font-weight: normal; line-height: 36px; color: #E11D48; margin: 0 0 20px 0; text-align: center;">
+                  Ritual Cancelled
+                </h1>
+                <p style="font-size: 15px; line-height: 24px; color: rgba(255, 255, 255, 0.6); margin: 0 0 30px 0; text-align: center;">
+                  Dear ${details.name}, we confirm that your scheduled booking for **${details.serviceName}** on **${details.date}** has been cancelled.
+                </p>
+                <div style="background-color: rgba(225, 29, 72, 0.05); border: 1px solid rgba(225, 29, 72, 0.15); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 30px;">
+                  <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.6);">
+                    If you paid a deposit, it will be automatically refunded back to your card within 3-5 business days.
+                  </p>
+                </div>
+                <!-- CTA Button -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="background-color: #C9A962; border-radius: 12px;">
+                      <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3002'}/book" target="_blank" style="display: inline-block; font-size: 14px; font-weight: bold; color: #0A0A0B; text-decoration: none; padding: 16px 32px; letter-spacing: 0.1em; text-transform: uppercase;">
+                        Book Alternative Slot
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="background-color: #0A0A0B; padding: 30px; text-align: center; border-top: 1px solid rgba(201, 169, 98, 0.1);">
+                <p style="font-size: 12px; color: rgba(255,255,255,0.3); margin: 0 0 10px 0;">
+                  La Plage, 403 Jumeirah Beach Road, Dubai, UAE
+                </p>
+                <p style="font-size: 11px; color: rgba(201, 169, 98, 0.4); margin: 0;">
+                  © ${new Date().getFullYear()} The Hideaway Saloon. All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Cancellation Email error:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * 7. Interactive Luxury Experience Review Invitation
+ */
+export async function sendReviewInvitation(email: string, details: {
+  name: string;
+  stylistName: string;
+}) {
+  try {
+    const from = getFromAddress();
+    await resend.emails.send({
+      from,
+      to: email,
+      subject: 'Review Your Experience – The Hideaway Sanctuary',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Review Your Experience</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #0A0A0B; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #FFFFFF;">
+          <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #0F0F10; border: 1px solid rgba(201, 169, 98, 0.15); margin: 40px auto; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <!-- Header Banner -->
+            <tr>
+              <td align="center" style="background: linear-gradient(135deg, #161617 0%, #0A0A0B 100%); padding: 40px 20px; border-bottom: 1px solid rgba(201, 169, 98, 0.1);">
+                <div style="font-size: 24px; font-weight: 300; letter-spacing: 0.15em; color: #C9A962; text-transform: uppercase;">
+                  THE HIDEAWAY
+                </div>
+                <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 5px;">
+                  HAIR & BEAUTY SANCTUARY
+                </div>
+              </td>
+            </tr>
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 40px 30px 40px;">
+                <h1 style="font-family: Georgia, serif; font-size: 26px; font-weight: normal; line-height: 36px; color: #FFFFFF; margin: 0 0 20px 0; text-align: center;">
+                  How Was Your Ritual?
+                </h1>
+                <p style="font-size: 15px; line-height: 24px; color: rgba(255, 255, 255, 0.6); margin: 0 0 30px 0; text-align: center;">
+                  Dear ${details.name}, we trust your experience with master artisan **${details.stylistName}** at The Hideaway met your highest standard.
+                </p>
+                <p style="font-size: 14px; line-height: 22px; color: rgba(255, 255, 255, 0.5); text-align: center; margin-bottom: 30px;">
+                  Your feedback helps us refine our rituals. Please take a brief moment to leave us a 5-star review on Fresha & Google.
+                </p>
+                <!-- CTA Button -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="background-color: #C9A962; border-radius: 12px;">
+                      <a href="${process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL || 'https://www.fresha.com/a/the-hideaway-dubai-403-jumeirah-beach-rd-la-plage-n7u5p6h4'}" target="_blank" style="display: inline-block; font-size: 14px; font-weight: bold; color: #0A0A0B; text-decoration: none; padding: 16px 32px; letter-spacing: 0.1em; text-transform: uppercase;">
+                        Leave a Review
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="background-color: #0A0A0B; padding: 30px; text-align: center; border-top: 1px solid rgba(201, 169, 98, 0.1);">
+                <p style="font-size: 12px; color: rgba(255,255,255,0.3); margin: 0 0 10px 0;">
+                  La Plage, 403 Jumeirah Beach Road, Dubai, UAE
+                </p>
+                <p style="font-size: 11px; color: rgba(201, 169, 98, 0.4); margin: 0;">
+                  © ${new Date().getFullYear()} The Hideaway Saloon. All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Review Email error:', error);
+    return { success: false, error };
+  }
+}
+
