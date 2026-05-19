@@ -31,16 +31,30 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Consultation not found' }, { status: 444 });
         }
 
-        const { selected_color_name, color_level, tone } = consultation;
+        const { selected_color_name, color_level, tone, reference_images, current_hair_images } = consultation;
+        const hasRef = reference_images && reference_images.length > 0;
+        const hasCurrent = current_hair_images && current_hair_images.length > 0;
 
-        // 4. Construct tailored prompts for OpenAI DALL-E 3 & FLUX
+        // 4. Construct tailored prompts for OpenAI DALL-E 3 & FLUX with reference image guidelines
         let prompt = '';
         if (type === 'hairstyle') {
             prompt = `A professional, high-end luxury hair salon styling showcase for a client. The client has an exquisite hair color of: ${selected_color_name} (Level ${color_level}, ${tone} undertone). Show a single elegant beauty portrait highlighting a stunning, modern, luxury hairstyle that perfectly complements this precise hair color. The setting is a hyper-premium luxury salon with warm gold accents, soft ambient lighting, and elegant mirrors in the background. High-fashion photography, cinematic lighting, 8k resolution, photorealistic, extremely premium look.`;
+            if (hasRef) {
+                prompt += ` The style, cut length, and wave flow must be heavily inspired by the client's uploaded reference inspiration look: ${reference_images[0]}.`;
+            }
+            if (hasCurrent) {
+                prompt += ` Adapt the look organically to flatter their current starting hair texture and face profile: ${current_hair_images[0]}.`;
+            }
         } else if (type === 'makeup') {
             prompt = `A high-end professional beauty portrait showing a gorgeous makeup look. The client's hair color is: ${selected_color_name} (Level ${color_level}, ${tone} undertone). The makeup is custom-tailored to perfectly harmonize with their seasonal color palette and skin undertone. Clean, luxury aesthetic, sophisticated beauty photography, luxury magazine cover style, soft glowing skin, flawless details, premium cosmetics brand style.`;
+            if (hasRef) {
+                prompt += ` Please ensure the makeup shades and glowing tones match the aesthetic feel of the client's reference visual: ${reference_images[0]}.`;
+            }
         } else if (type === 'color') {
             prompt = `A professional, luxury seasonal color draping analysis presentation chart. It shows a sophisticated color palette card layout with harmonious luxury fabric colors and seasonal draping swatches. The color palette is meticulously curated for a person with hair color: ${selected_color_name} (Level ${color_level}, ${tone} undertone). Elegant minimalist layout, luxury branding, modern design, soft cream and gold accents, photorealistic studio lighting.`;
+            if (hasCurrent) {
+                prompt += ` Meticulously drape the color palette to complement the customer's skin and physical attributes depicted in: ${current_hair_images[0]}.`;
+            }
         } else {
             return NextResponse.json({ error: 'Invalid AI action type' }, { status: 400 });
         }
