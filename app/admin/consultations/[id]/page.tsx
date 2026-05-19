@@ -196,6 +196,31 @@ export default function AdminConsultationChatPage() {
 
             if (result.success) {
                 toast.success(`${title} generated and sent to customer.`);
+                
+                // Trigger real-time Resend.com transactional notification to customer!
+                if (consultation?.profiles?.email) {
+                    try {
+                        fetch('/api/email/consultation-update', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: consultation.profiles.email,
+                                name: consultation.profiles.full_name || 'Valued Guest',
+                                type: type,
+                                stylistName: 'Master Artisan Stylist'
+                            })
+                        }).then(res => {
+                            if (res.ok) console.log('[Email Trigger] Resend notification successfully dispatched.');
+                            else console.warn('[Email Trigger] Resend dispatch returned non-ok status');
+                        }).catch(e => {
+                            console.warn('[Email Trigger] Resend connection error:', e);
+                        });
+                    } catch (e) {
+                        console.warn('[Email Trigger] Non-blocking Resend dispatch error:', e);
+                    }
+                }
             } else {
                 toast.error(result.error);
             }

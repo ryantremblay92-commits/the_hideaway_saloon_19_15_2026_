@@ -42,7 +42,26 @@ export default function RegisterPage() {
         } else {
             setIsSuccess(true);
             setIsLoading(false);
-            // Redirection or automated login can happen here
+            
+            // Dispatch dynamic welcome onboarding email via Resend
+            try {
+                fetch('/api/email/welcome', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        name
+                    })
+                }).then(res => {
+                    if (res.ok) console.log('[Welcome Trigger] Resend welcome onboarding dispatched.');
+                }).catch(e => {
+                    console.warn('[Welcome Trigger] Resend onboarding failure:', e);
+                });
+            } catch (e) {
+                console.warn('[Welcome Trigger] Welcome dispatch error:', e);
+            }
         }
     };
 
